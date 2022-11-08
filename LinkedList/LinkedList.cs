@@ -44,6 +44,36 @@
             newNode.List = this;
         }
 
+        public MyLinkedListNode<T> AddFirst(T item)
+        {
+            MyLinkedListNode<T> newNode = new(this, item);
+            if (Count == 0)
+            {
+                InsertNodeToEmptyList(newNode);
+            }
+            else
+            {
+                InsertNodeBefore(First!, newNode);
+                First = newNode;
+            }
+            return newNode;
+        }
+
+        public void AddFirst(MyLinkedListNode<T> newNode)
+        {
+            VerifyIsTheNodeUnowned(newNode);
+            if (Count == 0)
+            {
+                InsertNodeToEmptyList(newNode);
+            }
+            else
+            {
+                InsertNodeBefore(First!, newNode);
+                First = newNode;
+            }
+            newNode.List = this;
+        }
+
         public bool Remove(T item)
         {
             MyLinkedListNode<T>? node = Find(item);
@@ -92,19 +122,27 @@
 
         private void InsertNodeBefore(MyLinkedListNode<T> node, MyLinkedListNode<T> newNode)
         {
+            if (node != First)
+            {
+                newNode.Previous = node.Previous;
+                node.Previous!.Next = newNode;
+            }
+            else
+            {
+                First = newNode;
+            }
+
             newNode.Next = node;
-            newNode.Previous = node.Previous;
-            node.Previous!.Next = newNode;
             node.Previous = newNode;
             Count++;
         }
 
         private void InsertNodeAfter(MyLinkedListNode<T> node, MyLinkedListNode<T> newNode)
         {
-            if (node.Next != null)
+            if (node != Last)
             {
                 newNode.Next = node.Next;
-                node.Next.Previous = newNode;
+                node.Next!.Previous = newNode;
             }
             else
             {
