@@ -54,7 +54,6 @@
             else
             {
                 InsertNodeBefore(First!, newNode);
-                First = newNode;
             }
             return newNode;
         }
@@ -69,7 +68,6 @@
             else
             {
                 InsertNodeBefore(First!, newNode);
-                First = newNode;
             }
             newNode.List = this;
         }
