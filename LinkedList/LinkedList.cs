@@ -1,4 +1,6 @@
-﻿namespace LinkedList
+﻿using System.Xml.Linq;
+
+namespace LinkedList
 {
     public class MyLinkedList<T>
     {
@@ -72,6 +74,38 @@
             newNode.List = this;
         }
 
+        public MyLinkedListNode<T> AddAfter(MyLinkedListNode<T> node, T item)
+        {
+            VerifyIsTheNodeAttached(node);
+            MyLinkedListNode<T> newNode = new(this, item);
+            InsertNodeAfter(node, newNode);
+            return newNode;
+        }
+
+        public void AddAfter(MyLinkedListNode<T> node, MyLinkedListNode<T> newNode)
+        {
+            VerifyIsTheNodeAttached(node);
+            VerifyIsTheNodeUnowned(newNode);
+            InsertNodeAfter(node, newNode);
+            newNode.List = this;
+        }
+
+        public MyLinkedListNode<T> AddBefore(MyLinkedListNode<T> node, T item)
+        {
+            VerifyIsTheNodeAttached(node);
+            MyLinkedListNode<T> newNode = new(this, item);
+            InsertNodeBefore(node, newNode);
+            return newNode;
+        }
+
+        public void AddBefore(MyLinkedListNode<T> node, MyLinkedListNode<T> newNode)
+        {
+            VerifyIsTheNodeAttached(node);
+            VerifyIsTheNodeUnowned(newNode);
+            InsertNodeBefore(node, newNode);
+            newNode.List = this;
+        }
+
         public bool Remove(T item)
         {
             MyLinkedListNode<T>? node = Find(item);
@@ -109,6 +143,37 @@
                 current = current!.Next;
             }
             return current;
+        }
+
+        public MyLinkedListNode<T>? FindLast(T item)
+        {
+            MyLinkedListNode<T>? current = Last;
+            while (current != null && !current.Value!.Equals(item))
+            {
+                current = current!.Previous;
+            }
+            return current;
+        }
+
+        public bool Contains(T item)
+        {
+            return Find(item) == null ? false : true;
+        }
+
+        public void Clear()
+        {
+            MyLinkedListNode<T>? current = First;
+            while (current != null)
+            {
+                MyLinkedListNode<T>? temp = current;
+                current = current!.Next;
+                temp.Next = null;
+                temp.Previous = null;
+                temp.List = null;
+            }
+            Count = 0;
+            First = null;
+            Last = null;
         }
 
         private void InsertNodeToEmptyList(MyLinkedListNode<T> node)
@@ -206,7 +271,7 @@
             if (node.List != this)
             {
                 throw new InvalidOperationException
-                    ("The node is attached to another list or to nothing.");
+                    ("The node is either unattached or attached to another list.");
             }
         }
 
