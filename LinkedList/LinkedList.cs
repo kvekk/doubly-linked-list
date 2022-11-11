@@ -1,12 +1,17 @@
-﻿using System.Xml.Linq;
+﻿using System.Collections;
 
 namespace LinkedList
 {
-    public class MyLinkedList<T>
+    public class MyLinkedList<T> : ICollection<T>
     {
-        public int Count { get; private set; } = 0;
         public MyLinkedListNode<T>? First { get; private set; }
         public MyLinkedListNode<T>? Last { get; private set; }
+        public int Count { get; private set; } = 0;
+        private int State { get; set; } = 0;
+        bool ICollection<T>.IsReadOnly
+        {
+            get { return false; }
+        }
 
         public MyLinkedList() { }
 
@@ -106,6 +111,21 @@ namespace LinkedList
             newNode.List = this;
         }
 
+        void ICollection<T>.Add(T item)
+        {
+            AddLast(item);
+        }
+
+        public MyLinkedListNode<T>? Find(T item)
+        {
+            MyLinkedListNode<T>? current = First;
+            while (current != null && !current.Value!.Equals(item))
+            {
+                current = current!.Next;
+            }
+            return current;
+        }
+
         public bool Remove(T item)
         {
             MyLinkedListNode<T>? node = Find(item);
@@ -133,16 +153,6 @@ namespace LinkedList
         {
             VerifyIsTheListEmpty();
             RemoveNode(Last!);
-        }
-
-        public MyLinkedListNode<T>? Find(T item)
-        {
-            MyLinkedListNode<T>? current = First;
-            while (current != null && !current.Value!.Equals(item))
-            {
-                current = current!.Next;
-            }
-            return current;
         }
 
         public MyLinkedListNode<T>? FindLast(T item)
@@ -174,6 +184,27 @@ namespace LinkedList
             Count = 0;
             First = null;
             Last = null;
+            State++;
+        }
+
+        public void CopyTo(T[] array, int arrayIndex)
+        {
+            if (arrayIndex < 0 || arrayIndex >= array.Length)
+            {
+                throw new ArgumentOutOfRangeException("Such an index does not exist.");
+            }
+            
+            if (Count > array.Length - arrayIndex)
+            {
+                throw new ArgumentException("The data cannot fit into the array.");
+            }
+
+            MyLinkedListNode<T> temp = First!;
+            while (temp != null)
+            {
+                array.SetValue(temp.Value, arrayIndex++);
+                temp = temp.Next!;
+            }
         }
 
         private void InsertNodeToEmptyList(MyLinkedListNode<T> node)
@@ -181,6 +212,7 @@ namespace LinkedList
             First = node;
             Last = node;
             Count++;
+            State++;
         }
 
         private void InsertNodeBefore(MyLinkedListNode<T> node, MyLinkedListNode<T> newNode)
@@ -198,6 +230,7 @@ namespace LinkedList
             newNode.Next = node;
             node.Previous = newNode;
             Count++;
+            State++;
         }
 
         private void InsertNodeAfter(MyLinkedListNode<T> node, MyLinkedListNode<T> newNode)
@@ -215,6 +248,7 @@ namespace LinkedList
             node.Next = newNode;
             newNode.Previous = node;
             Count++;
+            State++;
         }
 
         private void RemoveNode(MyLinkedListNode<T> node)
@@ -255,6 +289,7 @@ namespace LinkedList
             node.Previous = null;
             node.List = null;
             Count--;
+            State++;
         }
 
         private static void VerifyIsTheNodeUnowned(MyLinkedListNode<T> node)
@@ -281,23 +316,28 @@ namespace LinkedList
                 throw new InvalidOperationException("The list is empty.");
         }
 
-        public void PrintList()
+        public IEnumerator<T> GetEnumerator()
         {
             MyLinkedListNode<T> temp = First!;
-            if (temp != null)
+            int rememberedState = State;
+
+            while (temp != null)
             {
-                Console.Write("The list contains: ");
-                while (temp != null)
+                yield return temp.Value;
+
+                if (rememberedState != State)
                 {
-                    Console.Write(temp.Value + " ");
-                    temp = temp.Next!;
+                    throw new InvalidOperationException
+                        ("Collection was modified after the enumerator was instantiated.");
                 }
-                Console.WriteLine();
+
+                temp = temp.Next!;
             }
-            else
-            {
-                Console.WriteLine("The list is empty.");
-            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }
