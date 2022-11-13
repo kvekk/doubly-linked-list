@@ -8,10 +8,10 @@ namespace LinkedList
         public MyLinkedListNode<T>? Last { get; private set; }
         public int Count { get; private set; } = 0;
         private int State { get; set; } = 0;
-        bool ICollection<T>.IsReadOnly
-        {
-            get { return false; }
-        }
+        bool ICollection<T>.IsReadOnly => false;
+
+        public delegate void LinkedListDelegate(string message);
+        public event LinkedListDelegate? Notify;
 
         public MyLinkedList() { }
 
@@ -167,7 +167,7 @@ namespace LinkedList
 
         public bool Contains(T item)
         {
-            return Find(item) == null ? false : true;
+            return Find(item) != null;
         }
 
         public void Clear()
@@ -185,6 +185,7 @@ namespace LinkedList
             First = null;
             Last = null;
             State++;
+            Notify?.Invoke("The list was emptied.");
         }
 
         public void CopyTo(T[] array, int arrayIndex)
@@ -213,6 +214,7 @@ namespace LinkedList
             Last = node;
             Count++;
             State++;
+            Notify?.Invoke($"Node with the value of '{node.Value}' was added to an empty list.");
         }
 
         private void InsertNodeBefore(MyLinkedListNode<T> node, MyLinkedListNode<T> newNode)
@@ -231,6 +233,8 @@ namespace LinkedList
             node.Previous = newNode;
             Count++;
             State++;
+            Notify?.Invoke($"New node with the value of '{newNode.Value}' was " +
+                $"inserted before the node with the value of '{node.Value}'.");
         }
 
         private void InsertNodeAfter(MyLinkedListNode<T> node, MyLinkedListNode<T> newNode)
@@ -249,6 +253,8 @@ namespace LinkedList
             newNode.Previous = node;
             Count++;
             State++;
+            Notify?.Invoke($"New node with the value of '{newNode.Value}' was " +
+                $"inserted after the node with the value of '{node.Value}'.");
         }
 
         private void RemoveNode(MyLinkedListNode<T> node)
@@ -290,6 +296,7 @@ namespace LinkedList
             node.List = null;
             Count--;
             State++;
+            Notify?.Invoke($"Node with the value of '{node.Value}' was removed from the list.");
         }
 
         private static void VerifyIsTheNodeUnowned(MyLinkedListNode<T> node)
